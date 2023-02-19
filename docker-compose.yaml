@@ -10,17 +10,16 @@ x-common-variables: &common-env-variables
 services:
   app:
     build: .
-    #image: flats:app
-    #command: bash -c "sleep 10 && python flats_downloader/server.py"  # wait for database to start
+    # Run server
     command: python flats_downloader/server.py
+    # Download newest flats
+    # command: bash -c "cd flats_downloader && scrapy crawl flats"
     environment:
       <<: *common-env-variables
       COUNT: 500
       DB_TABLE_NAME: sreality_flats_sell
-      #POSTGRES_HOST: database  # should be same as the name of the other service
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432  # should be same as second port in "database" service
-      #POSTGRES_DB: flats_sell
     ports:
       - 8080:8080
     volumes:
@@ -32,13 +31,11 @@ services:
 
   database:
     image: postgres
-    environment:   # Set up postgres database name and password
+    environment:
       <<: *common-env-variables
       PGDATA: "./pgdata"
-    ports:    # Set up ports exposed for other containers to connect to
-      - 5455:5432  # outside:inside ports
-    #networks:
-    #  - app-tier
+    ports:
+      - 5455:5432
     volumes:
      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
     network_mode: "host"
