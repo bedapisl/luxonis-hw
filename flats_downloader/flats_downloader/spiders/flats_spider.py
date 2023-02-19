@@ -124,11 +124,3 @@ class FlatsSpider(scrapy.Spider):
 
         self.cursor.execute(f"INSERT INTO {DB_TABLE_NAME} (RecordID, Timestamp, Title, URL, Image) VALUES (%s, %s, %s, %s, %s)", (db_size, timestamp, flat_data.title, flat_data.link, image_data))
         self.connection.commit()
-
-
-if __name__ == "__main__":
-    downloaded_path = "/home/beda/luxonis/flats_downloader/flats-json-500-v2.json"
-    with open(downloaded_path, "r") as input_file:
-        file_content = json.loads(input_file.read())
-    
-        process_response(file_content)
