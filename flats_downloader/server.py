@@ -15,7 +15,7 @@ from scrapy.crawler import CrawlerProcess
 RECORDS_PER_PAGE = 20
 
 
-def render_image(image_link: memoryview) -> Component:
+def render_image(image_link: str) -> Component:
     """
     Returns HTML element with the image.
     """
@@ -23,7 +23,7 @@ def render_image(image_link: memoryview) -> Component:
     return html.Img(src=image_link)
 
 
-def render_single_flat(flat_data: Tuple[int, datetime.datetime, str, str, memoryview]) -> Component:
+def render_single_flat(flat_data: Tuple[int, datetime.datetime, str, str, str]) -> Component:
     """
     Return HTML element representing a single flat.
     """
