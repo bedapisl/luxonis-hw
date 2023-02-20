@@ -10,10 +10,7 @@ x-common-variables: &common-env-variables
 services:
   app:
     build: .
-    # Run server
     command: python flats_downloader/server.py
-    # Download newest flats
-    # command: bash -c "cd flats_downloader && scrapy crawl flats"
     environment:
       <<: *common-env-variables
       COUNT: 500
@@ -33,9 +30,6 @@ services:
     image: postgres
     environment:
       <<: *common-env-variables
-#      PGDATA: "./pgdata"
     ports:
       - 5455:5432
-#    volumes:
-#     - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
     network_mode: "host"

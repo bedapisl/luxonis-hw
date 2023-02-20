@@ -100,7 +100,7 @@ def create_callbacks(cursor: cursor) -> None:
         return render_page(page - 1, cursor)  # Use -1 because first page on frontend has index 1, but we start from 0
 
 
-def start_downloading():
+def start_downloading() -> None:
     """
     Starts downloading of current newest data
     """
