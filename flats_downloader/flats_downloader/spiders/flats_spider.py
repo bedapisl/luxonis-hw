@@ -46,13 +46,14 @@ def prepare_table(cursor: psycopg2.extensions.cursor, connection: psycopg2.exten
     existing_table_names = [x[0] for x in cursor.fetchall()]
 
     if DB_TABLE_NAME not in existing_table_names:
+        print("CREATING TABLE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         cursor.execute(f" \
             CREATE TABLE {DB_TABLE_NAME} (\
             RecordID int, \
             Timestamp timestamp, \
             Title text, \
             URL text, \
-            Image bytea \
+            ImageURL text \
         );")
         connection.commit()
 
@@ -107,20 +108,29 @@ class FlatsSpider(scrapy.Spider):
         flat_data = process_flat_data(json.loads(response.body))
         timestamp = datetime.datetime.now()
 
-        for single_flat_data in flat_data:
-            yield scrapy.Request(url=single_flat_data.image_link, callback=self.parse_image, meta={"flat_data": single_flat_data, "timestamp": timestamp})
-
-    def parse_image(self, response: requests.models.Response) -> None:
-        """
-        Called automatically by scrapy when an image is downloaded.
-        Inserts single downloaded example into the database.
-        """
-        flat_data = response.meta.get("flat_data")
-        timestamp = response.meta.get("timestamp")
-        image_data = response.body
-
         self.cursor.execute(f"SELECT COUNT (*) FROM {DB_TABLE_NAME}")
         db_size = self.cursor.fetchone()[0]
 
-        self.cursor.execute(f"INSERT INTO {DB_TABLE_NAME} (RecordID, Timestamp, Title, URL, Image) VALUES (%s, %s, %s, %s, %s)", (db_size, timestamp, flat_data.title, flat_data.link, image_data))
-        self.connection.commit()
+        for flat in flat_data:
+            self.cursor.execute(f"INSERT INTO {DB_TABLE_NAME} (RecordID, Timestamp, Title, URL, ImageURL) VALUES (%s, %s, %s, %s, %s)", (db_size, timestamp, flat.title, flat.link, flat.image_link))
+            self.connection.commit()
+            db_size += 1
+
+
+#        for single_flat_data in flat_data:
+#            yield scrapy.Request(url=single_flat_data.image_link, callback=self.parse_image, meta={"flat_data": single_flat_data, "timestamp": timestamp})
+#
+#    def parse_image(self, response: requests.models.Response) -> None:
+#        """
+#        Called automatically by scrapy when an image is downloaded.
+#        Inserts single downloaded example into the database.
+#        """
+#        flat_data = response.meta.get("flat_data")
+#        timestamp = response.meta.get("timestamp")
+#        image_data = response.body
+#
+#        self.cursor.execute(f"SELECT COUNT (*) FROM {DB_TABLE_NAME}")
+#        db_size = self.cursor.fetchone()[0]
+#
+#        self.cursor.execute(f"INSERT INTO {DB_TABLE_NAME} (RecordID, Timestamp, Title, URL, Image) VALUES (%s, %s, %s, %s, %s)", (db_size, timestamp, flat_data.title, flat_data.link, image_data))
+#        self.connection.commit()

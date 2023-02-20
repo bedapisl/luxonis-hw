@@ -33,9 +33,9 @@ services:
     image: postgres
     environment:
       <<: *common-env-variables
-      PGDATA: "./pgdata"
+#      PGDATA: "./pgdata"
     ports:
       - 5455:5432
-    volumes:
-     - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+#    volumes:
+#     - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
     network_mode: "host"

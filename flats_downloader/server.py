@@ -4,19 +4,23 @@ from typing import Tuple, Optional
 import datetime
 from dash import Dash, html, dcc, Input, Output
 from dash.exceptions import PreventUpdate
-from flats_downloader.spiders.flats_spider import DB_TABLE_NAME, get_cursor
+from flats_downloader.spiders.flats_spider import DB_TABLE_NAME, get_cursor, FlatsSpider
 import dash_bootstrap_components as dbc
 from dash.dependencies import Component
 from psycopg2.extensions import cursor
+import scrapy
+from scrapy.crawler import CrawlerProcess
+
 
 RECORDS_PER_PAGE = 20
 
 
-def render_image(image_data: memoryview) -> Component:
+def render_image(image_link: memoryview) -> Component:
     """
     Returns HTML element with the image.
     """
-    return html.Img(src='data:image/png;base64,' + base64.b64encode(image_data).decode('utf-8'))
+    #return html.Img(src='data:image/png;base64,' + base64.b64encode(image_data).decode('utf-8'))
+    return html.Img(src=image_link)
 
 
 def render_single_flat(flat_data: Tuple[int, datetime.datetime, str, str, memoryview]) -> Component:
@@ -96,7 +100,20 @@ def create_callbacks(cursor: cursor) -> None:
         return render_page(page - 1, cursor)  # Use -1 because first page on frontend has index 1, but we start from 0
 
 
+def start_downloading():
+    """
+    Starts downloading of current newest data
+    """
+    process = CrawlerProcess({
+        'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
+    })
+       
+    process.crawl(FlatsSpider)
+    process.start()
+
+
 if __name__ == '__main__':
+    start_downloading()
     app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
     connection, cursor = get_cursor()
     create_callbacks(cursor)
